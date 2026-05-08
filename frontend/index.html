@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CohortFilter AI — AI-powered accelerator application scoring. Upload CSV, define rubric, get ranked shortlist.">
+    <title>CohortFilter AI — Accelerator Application Scoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%234338CA'/><text x='16' y='22' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700' font-size='14'>CF</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Top Bar -->
+        <header id="topbar">
+            <div class="topbar-left">
+                <div class="logo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    <span class="logo-text">CohortFilter <span class="logo-ai">AI</span></span>
+                </div>
+            </div>
+            <div class="topbar-center">
+                <div id="step-indicators">
+                    <button class="step-ind active" data-step="rubric" id="ind-rubric">
+                        <span class="step-num">1</span> Define Rubric
+                    </button>
+                    <span class="step-arrow">→</span>
+                    <button class="step-ind" data-step="upload" id="ind-upload">
+                        <span class="step-num">2</span> Upload Data
+                    </button>
+                    <span class="step-arrow">→</span>
+                    <button class="step-ind" data-step="results" id="ind-results">
+                        <span class="step-num">3</span> Review Results
+                    </button>
+                    <span class="step-arrow">→</span>
+                    <button class="step-ind" data-step="export" id="ind-export">
+                        <span class="step-num">4</span> Export
+                    </button>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <span class="badge-amd">AMD MI300X</span>
+                <span class="badge-model">Llama 3 70B</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+
+            <!-- STEP 1: Rubric Chat -->
+            <section id="step-rubric" class="step-panel active">
+                <div class="panel-header">
+                    <h1>Define Your Scoring Rubric</h1>
+                    <p class="panel-subtitle">Describe your accelerator program and scoring criteria. The AI will extract a structured rubric.</p>
+                </div>
+                <div class="chat-container" id="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-msg assistant">
+                            <div class="msg-avatar">AI</div>
+                            <div class="msg-body">
+                                <p>Welcome to CohortFilter AI. Tell me about your accelerator program:</p>
+                                <ul>
+                                    <li>What's the program focus? (e.g., AI startups, pre-seed, India-based)</li>
+                                    <li>Any dealbreakers? (e.g., no solo founders, must have revenue)</li>
+                                    <li>How should I weight scoring? (e.g., Traction 40%, Team 30%)</li>
+                                </ul>
+                                <p>Or click <strong>Load Demo Rubric</strong> to use a preset configuration.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="chat-suggestions">
+                            <button class="suggestion-chip" id="chip-demo" onclick="loadDemoRubric()">⚡ Load Demo Rubric</button>
+                            <button class="suggestion-chip" onclick="fillSuggestion('ai-india')">AI startups in India</button>
+                            <button class="suggestion-chip" onclick="fillSuggestion('fintech')">Fintech accelerator</button>
+                            <button class="suggestion-chip" style="margin-left: auto; color: var(--danger); border-color: var(--danger-light);" onclick="clearChat()">🗑️ Clear Chat</button>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="file" id="rubric-doc-upload" accept=".pdf,.doc,.docx,.txt,.md" style="display: none;" onchange="handleDocumentUpload(event)">
+                            <button id="btn-upload-doc" onclick="document.getElementById('rubric-doc-upload').click()" title="Upload Document (PDF, DOCX, TXT)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            </button>
+                            <textarea id="chat-input" placeholder="Describe your program focus, dealbreakers, and scoring weights..." rows="2"></textarea>
+                            <button id="btn-send-chat" onclick="sendChatMessage()" title="Send">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rubric confirmation card (hidden until extracted) -->
+                <div id="rubric-card" class="rubric-card hidden">
+                    <div class="rubric-card-header">
+                        <h3>📋 Extracted Rubric</h3>
+                        <span class="rubric-status" id="rubric-status">Pending confirmation</span>
+                    </div>
+                    <div id="rubric-card-body"></div>
+                    <div class="rubric-card-actions">
+                        <button class="btn btn-primary" id="btn-confirm-rubric" onclick="confirmRubric()">Confirm Rubric & Continue</button>
+                        <button class="btn btn-ghost" onclick="resetRubric()">Reset</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 2: Upload CSV -->
+            <section id="step-upload" class="step-panel">
+                <div class="panel-header">
+                    <h1>Upload Application Data</h1>
+                    <p class="panel-subtitle">Upload a CSV file with startup applications. Expected columns: startup_name, founder_name, what_building, traction, team_size, mrr, etc.</p>
+                </div>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-zone" id="upload-zone">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p class="upload-text">Drag & drop your CSV here, or <label for="file-input" class="upload-link">browse files</label></p>
+                        <p class="upload-hint">Supports .csv files from Typeform, Google Forms, SurveyMonkey</p>
+                        <input type="file" id="file-input" accept=".csv" onchange="handleFileSelect(event)" hidden>
+                    </div>
+                    <div class="upload-or">
+                        <span>or</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadDemoCSV()">📊 Use Demo Dataset (50 applications)</button>
+                </div>
+                <!-- Upload preview -->
+                <div id="upload-preview" class="upload-preview hidden">
+                    <div class="preview-header">
+                        <h3 id="preview-title">Uploaded: —</h3>
+                        <span class="badge" id="preview-count">0 rows</span>
+                    </div>
+                    <div class="preview-table-wrap">
+                        <table id="preview-table" class="data-table compact">
+                            <thead id="preview-thead"></thead>
+                            <tbody id="preview-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary" id="btn-start-scoring" onclick="startScoring()">🚀 Score Applications</button>
+                </div>
+            </section>
+
+            <!-- STEP 3: Results Dashboard -->
+            <section id="step-results" class="step-panel">
+                <!-- Scoring Progress -->
+                <div id="scoring-progress" class="scoring-progress hidden">
+                    <div class="progress-header">
+                        <h2>Scoring Applications</h2>
+                        <span id="progress-text" class="progress-text">0 / 0</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="progress-detail" id="progress-detail">Initializing scoring pipeline...</p>
+                </div>
+
+                <!-- Results Dashboard -->
+                <div id="results-dashboard" class="hidden">
+                    <div class="results-header">
+                        <div>
+                            <h1>Application Scores</h1>
+                            <p class="panel-subtitle" id="results-summary">—</p>
+                        </div>
+                        <div class="results-actions">
+                            <div class="filter-group">
+                                <label for="filter-select">Show:</label>
+                                <select id="filter-select" onchange="filterResults()">
+                                    <option value="all">All Applications</option>
+                                    <option value="shortlist">Shortlist (Top 10)</option>
+                                    <option value="qualified">Qualified (No Dealbreakers)</option>
+                                    <option value="flagged">Flagged / Dealbreakers</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="goToExport()">Export Results →</button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-row" id="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-total">0</div>
+                            <div class="stat-label">Total Scored</div>
+                        </div>
+                        <div class="stat-card stat-green">
+                            <div class="stat-value" id="stat-shortlist">0</div>
+                            <div class="stat-label">Shortlisted</div>
+                        </div>
+                        <div class="stat-card stat-amber">
+                            <div class="stat-value" id="stat-flagged">0</div>
+                            <div class="stat-label">Flagged</div>
+                        </div>
+                        <div class="stat-card stat-red">
+                            <div class="stat-value" id="stat-rejected">0</div>
+                            <div class="stat-label">Dealbreaker Hits</div>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Alerts -->
+                    <div id="duplicate-alerts" class="duplicate-alerts hidden"></div>
+
+                    <!-- Results Table -->
+                    <div class="results-table-wrap">
+                        <table class="data-table" id="results-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-rank">#</th>
+                                    <th class="col-name">Startup</th>
+                                    <th class="col-founder">Founder</th>
+                                    <th class="col-score sortable" onclick="sortResults('total_score')">Score ↕</th>
+                                    <th class="col-dims">Dimensions</th>
+                                    <th class="col-flags">Flags</th>
+                                    <th class="col-expand"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 4: Export -->
+            <section id="step-export" class="step-panel">
+                <div class="panel-header">
+                    <h1>Export Shortlist</h1>
+                    <p class="panel-subtitle">Download your scored results as a PDF shortlist report or a CSV spreadsheet.</p>
+                </div>
+                <div class="export-grid">
+                    <div class="export-card">
+                        <div class="export-icon">📄</div>
+                        <h3>PDF Shortlist Report</h3>
+                        <p>Branded PDF with ranked shortlist, scoring rubric, and dimension breakdowns. Ready for stakeholder review.</p>
+                        <div class="export-options">
+                            <label for="pdf-top-n">Include top</label>
+                            <select id="pdf-top-n">
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="50">All scored</option>
+                            </select>
+                            <span>applications</span>
+                        </div>
+                        <button class="btn btn-primary" id="btn-export-pdf" onclick="exportPDF()">Download PDF</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-icon">📊</div>
+                        <h3>Scored CSV</h3>
+                        <p>Full scored dataset with all dimension scores, confidence levels, and risk flags. Import into your tools.</p>
+                        <button class="btn btn-secondary" id="btn-export-csv" onclick="exportCSV()">Download CSV</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer id="app-footer">
+            <span>CohortFilter AI v0.1 — Built for the AMD Developer Hackathon</span>
+            <span>Powered by AMD MI300X · Llama 3 70B · vLLM on ROCm</span>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
