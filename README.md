@@ -1,4 +1,7 @@
 # CohortFilter AI
+An AI-powered triage dashboard for startup accelerators to automatically score, rank, and filter large batches of applications based on custom rubrics and dealbreakers.
+
+![CohortFilter AI Landing Page](assets/landing.png)
 
 > The AI that shortlists accelerator applications so program managers only review the top 10%.
 
