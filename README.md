@@ -131,4 +131,4 @@ MIT
 
 ## Team
 
-Built by [Your Name] for the AMD Developer Hackathon 2026.
+Built by Jaideep Murthy for the AMD Developer Hackathon 2026.
