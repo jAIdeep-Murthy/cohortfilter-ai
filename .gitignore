@@ -20,3 +20,5 @@ __pycache__/
 # Output
 *.pdf
 data/state/
+# SSH Keys
+amd_key*

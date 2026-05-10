@@ -1,0 +1,17 @@
+INFO 05-10 08:07:51 [utils.py:302]        █     █     █▄   ▄█
+INFO 05-10 08:07:51 [utils.py:302]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.17.1
+INFO 05-10 08:07:51 [utils.py:302]   █▄█▀ █     █     █     █  model   NousResearch/Meta-Llama-3-8B-Instruct
+INFO 05-10 08:07:51 [utils.py:302]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+INFO 05-10 08:07:51 [utils.py:238] non-default args: {'host': '0.0.0.0', 'model': 'NousResearch/Meta-Llama-3-8B-Instruct', 'dtype': 'float16', 'max_model_len': 4096, 'gpu_memory_utilization': 0.85}
+WARNING 05-10 08:07:58 [gpt_oss_triton_kernels_moe.py:56] Using legacy triton_kernels on ROCm
+INFO 05-10 08:07:59 [model.py:531] Resolved architecture: LlamaForCausalLM
+INFO 05-10 08:07:59 [model.py:1554] Using max model len 4096
+INFO 05-10 08:08:05 [core.py:101] Initializing a V1 LLM engine (v0.17.1) with config: model='NousResearch/Meta-Llama-3-8B-Instruct'
+WARNING 05-10 08:08:06 [gpt_oss_triton_kernels_moe.py:56] Using legacy triton_kernels on ROCm
+INFO 05-10 08:08:07 [gpu_model_runner.py:4281] Starting to load model NousResearch/Meta-Llama-3-8B-Instruct...
+INFO 05-10 08:08:07 [rocm.py:463] Using Triton Attention backend.
+INFO 05-10 08:08:21 [default_loader.py:293] Loading weights took 2.22 seconds
+INFO 05-10 08:08:21 [gpu_model_runner.py:4364] Model loading took 15.01 GiB memory and 13.992585 seconds
+INFO 05-10 08:08:38 [backends.py:366] Compiling a graph for compile range (1, 8192) takes 12.11 s
+INFO 05-10 08:08:38 [monitor.py:35] torch.compile takes 17.10 s in total
+INFO 05-10 08:09:18 [api_server.py:490] Uvicorn running on http://0.0.0.0:8000
